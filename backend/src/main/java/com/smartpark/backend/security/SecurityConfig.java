@@ -40,11 +40,13 @@ public class SecurityConfig {
                         // ✅ Routes publiques
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/auth/marketplace/**",
                                 "/api/terrains/**",
                                 "/api/reservations/**",
                                 "/api/tarifs/**",
                                 "/api/chatbot/**",
-                                "/api/stats/**"
+                                "/api/stats/**",
+                                "/api/produits/ai/**"
                         ).permitAll()
 
                         // ✅ Route protégée (AJOUTÉE ICI)

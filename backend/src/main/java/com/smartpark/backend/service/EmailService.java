@@ -11,10 +11,10 @@ import jakarta.mail.internet.MimeMessage;
 @Service
 public class EmailService {
 
-    @Autowired
+        @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Value("${smartpark.mail.from}")
+        @Value("${smartpark.mail.from:noreply@smartpark.com}")
     private String fromAddress;
 
     // ✅ Méthode générique d'envoi HTML
@@ -24,6 +24,11 @@ public class EmailService {
             String subject,
             String htmlContent) {
         try {
+                        if (mailSender == null) {
+                                System.err.println("⚠️ JavaMailSender indisponible: email non envoyé vers " + to);
+                                return;
+                        }
+
             MimeMessage message =
                     mailSender.createMimeMessage();
             MimeMessageHelper helper =

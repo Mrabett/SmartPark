@@ -1,0 +1,138 @@
+<div class="page-content">
+  <!-- Header -->
+  <div class="section-header">
+    <div>
+      <h1 class="section-title text-4xl">📦 Catalogue Produits</h1>
+      <p class="catalog-subtitle">Decouvrez notre selection exclusive de produits</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="sp-card mb-4">
+    <div class="filters-grid">
+      <!-- Search -->
+      <div class="form-group">
+        <label class="form-label">Rechercher</label>
+        <input 
+          type="text" 
+          class="form-input"
+          placeholder="Nom du produit..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="filterProduits()"
+        />
+      </div>
+
+      <!-- Category Filter -->
+      <div class="form-group">
+        <label class="form-label">Catégorie</label>
+        <select 
+          class="form-select"
+          [(ngModel)]="selectedCategory"
+          (ngModelChange)="filterProduits()"
+        >
+          <option value="">Toutes les catégories</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- Add New -->
+      <div class="flex items-end" *ngIf="isAdmin">
+        <button 
+          routerLink="/marketplace/admin/produits/nouveau"
+          class="btn btn-primary w-full"
+        >
+          ➕ Ajouter Produit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-12">
+    <p class="text-muted">Chargement des produits...</p>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && filteredProduits.length > 0" class="products-grid">
+    <div *ngFor="let produit of filteredProduits" class="sp-card catalog-card cursor-pointer">
+      <!-- Image Placeholder -->
+      <div class="catalog-image-wrap relative mb-4 bg-bg3 h-48 rounded-lg flex items-center justify-center overflow-hidden" style="background: var(--bg3);">
+        <img 
+          [src]="produit.image" 
+          alt="{{ produit.nom }}"
+          class="w-full h-full object-cover rounded-lg"
+          onerror="this.src='https://via.placeholder.com/200?text=No+Image'"
+        />
+        
+        <!-- Special Offer Badge for Products in Promotion -->
+        <div class="absolute top-2 left-2" *ngIf="hasPromotion(produit)">
+          <span class="badge badge-amber animate-pulse font-bold">
+            ⭐ OFFRE SPÉCIALE
+          </span>
+        </div>
+
+        <!-- Stock Badge -->
+        <div class="absolute top-2 right-2">
+          <span *ngIf="produit.stock && produit.stock.quantiteDisponible > 0; else outOfStock" 
+            class="badge badge-green">
+            En stock ({{ produit.stock.quantiteDisponible }})
+          </span>
+          <ng-template #outOfStock>
+            <span class="badge badge-red">Rupture</span>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <h3 class="section-title text-lg mb-2 truncate" style="color: var(--text);">{{ produit.nom }}</h3>
+      <p class="catalog-description text-sm mb-3 line-clamp-2">{{ produit.description }}</p>
+
+      <!-- Category Badge -->
+      <div class="mb-3">
+        <span class="badge badge-green text-xs">{{ produit.categorie }}</span>
+      </div>
+
+      <!-- Price -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <p class="text-2xl font-bold" style="color: var(--green);">{{ produit.prix }} DT</p>
+          <p *ngIf="getReductionPercentage(produit) > 0" class="text-sm" style="color: var(--red);">
+            -{{ getReductionPercentage(produit) }}%
+          </p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2">
+        <button 
+          [routerLink]="['/marketplace', isAdmin ? 'admin' : 'client', 'produits', produit.id]"
+          class="btn btn-ghost flex-1"
+        >
+          👁️ Détails
+        </button>
+        <button
+          *ngIf="!isAdmin"
+          class="btn btn-primary flex-1"
+          (click)="addToCart(produit)"
+        >
+          🛒 Panier
+        </button>
+        <button 
+          *ngIf="isAdmin"
+          [routerLink]="['/marketplace/admin', 'produits', produit.id, 'edit']"
+          class="btn btn-primary flex-1"
+        >
+          ✏️
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredProduits.length === 0" class="text-center py-20 sp-card bg-bg3/20 border-dashed">
+    <div class="text-5xl mb-4 opacity-20">🔍</div>
+    <p class="text-xl font-bold" style="color: var(--text);">Aucun produit trouvé</p>
+    <p class="text-muted mt-2">Désolé, nous n'avons pas trouvé de résultats pour votre recherche.</p>
+  </div>
+</div>
+

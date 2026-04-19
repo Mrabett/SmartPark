@@ -3,6 +3,7 @@ package com.smartpark.backend.service;
 import com.smartpark.backend.model.Reservation;
 import com.smartpark.backend.repository.ReservationRepository;
 import com.smartpark.backend.repository.UserRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ReservationSchedulerService {
     // ════════════════════════════════════════════
     @Scheduled(fixedDelay = 600000) // 10 minutes
     public void distribuerPointsReservationsTerminees() {
+                try {
 
         List<Reservation> reservations =
                 reservationRepository.findAll()
@@ -72,6 +74,9 @@ public class ReservationSchedulerService {
                                 + e.getMessage());
             }
         }
+                } catch (DataAccessException ex) {
+                        System.err.println("⚠️ Scheduler réservations: Mongo indisponible, cycle ignoré.");
+                }
     }
 
     private boolean reservationEstTerminee(

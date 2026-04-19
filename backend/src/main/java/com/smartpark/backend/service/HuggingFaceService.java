@@ -9,7 +9,7 @@ import java.util.*;
 @Service
 public class HuggingFaceService {
 
-    @Value("${huggingface.api.key}")
+    @Value("${huggingface.api.key:}")
     private String apiKey;
 
     // ✅ URL FINALE — api-inference (pas router)

@@ -1,0 +1,169 @@
+<div class="page-content">
+  <div *ngIf="loading" class="text-center py-12">
+    <p class="text-muted">Chargement...</p>
+  </div>
+
+  <div *ngIf="!loading && produit" class="detail-grid">
+    <!-- Image -->
+    <div class="media-column">
+      <div class="sp-card media-card overflow-hidden p-0">
+        <img 
+          [src]="produit.image" 
+          alt="{{ produit.nom }}"
+          class="product-image"
+          onerror="this.src='https://via.placeholder.com/400'"
+        />
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="info-column">
+      <!-- Breadcrumb -->
+      <button [routerLink]="['/marketplace', isAdmin ? 'admin' : 'client', 'produits']" class="btn btn-ghost mb-6">
+        ← Retour au catalogue
+      </button>
+      
+      <h1 class="section-title text-5xl mb-4" style="color: var(--text);">{{ produit.nom }}</h1>
+      <span class="badge badge-green">{{ produit.categorie }}</span>
+      
+      <p class="product-description">{{ produit.description }}</p>
+
+      <div class="sp-card expiry-card mt-6">
+        <p class="expiry-label">Date d'expiration</p>
+        <p class="expiry-value" *ngIf="produit.dateExpiration; else noExpiryDate">
+          {{ produit.dateExpiration | date:'dd/MM/yyyy' }}
+        </p>
+        <ng-template #noExpiryDate>
+          <p class="expiry-missing">Non definie</p>
+        </ng-template>
+      </div>
+
+      <!-- Stock Info -->
+      <div class="sp-card stock-card my-8">
+        <div *ngIf="produit.stock; let stock">
+          <p class="mb-2 stock-line"><strong>Stock disponible:</strong> <span style="color: var(--green);">{{ stock.quantiteDisponible }}</span> unites</p>
+          <p class="stock-help">Alerte stock min: {{ stock.quantiteMin }} | Capacite max: {{ stock.quantiteMax }}</p>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="mb-8">
+        <p class="price-line">{{ produit.prix }} <span class="text-2xl">DT</span></p>
+      </div>
+
+      <!-- Quantity & Actions -->
+      <div class="actions-row" *ngIf="!isAdmin">
+        <div class="qty-wrap">
+          <button (click)="quantity = quantity > 1 ? quantity - 1 : 1" class="btn btn-ghost">-</button>
+          <input type="number" [value]="quantity" (input)="quantity = $any($event.target).valueAsNumber || 1" min="1" class="qty-input" />
+          <button (click)="quantity = quantity + 1" class="btn btn-ghost">+</button>
+        </div>
+        <button (click)="addToCart()" class="btn btn-primary flex-1 py-4 text-xl">
+          🛒 Ajouter au panier
+        </button>
+      </div>
+
+      <!-- Edit/Delete (ADMIN) -->
+      <div class="actions-row" *ngIf="isAdmin">
+        <button [routerLink]="['/marketplace/admin', 'produits', produit.id, 'edit']" class="btn btn-primary flex-1 py-3">
+          ✏️ Modifier le produit
+        </button>
+        <button (click)="deleteProduit()" class="btn btn-ghost flex-1 py-3" style="color: var(--red); border-color: var(--red);">
+          🗑️ Supprimer
+        </button>
+      </div>
+
+      <div class="sp-card reviews-card">
+        <div class="reviews-header">
+          <h2 class="section-title text-2xl" style="color: var(--text);">⭐ Avis clients</h2>
+          <div class="reviews-summary" *ngIf="reviewStats">
+            <span class="reviews-average">{{ reviewStats.averageRating || 0 }}/5</span>
+            <span class="reviews-count">({{ reviewStats.totalReviews || 0 }} avis)</span>
+          </div>
+        </div>
+
+        <div *ngIf="isAdmin" class="sp-card insight-card mb-4">
+          <div class="insight-header">
+            <h3 class="section-title text-lg" style="color: var(--text);">🧠 Résumé IA (Admin)</h3>
+            <span class="badge badge-primary" *ngIf="reviewInsight">Confiance: {{ reviewInsight.noteConfiance }}%</span>
+          </div>
+
+          <p *ngIf="reviewInsightLoading" class="insight-muted">Analyse des avis en cours...</p>
+
+          <ng-container *ngIf="!reviewInsightLoading && reviewInsight; else noInsight">
+            <p class="insight-text">{{ reviewInsight.resumeAdmin }}</p>
+            <p class="insight-meta">
+              {{ reviewInsight.nbAvisAnalyses }} avis analyses • généré le {{ reviewInsight.dateGeneration | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </ng-container>
+
+          <ng-template #noInsight>
+            <p *ngIf="!reviewInsightLoading" class="insight-muted">Aucun insight disponible pour ce produit.</p>
+          </ng-template>
+        </div>
+
+        <div *ngIf="!isAdmin" class="review-form-wrap">
+          <h3 class="section-title text-lg mb-2" style="color: var(--text);">Donnez votre avis</h3>
+          <p class="review-rule mb-3">Seuls les clients ayant acheté ce produit peuvent publier un avis.</p>
+
+          <div class="form-group mb-3">
+            <label class="form-label">Note</label>
+            <select [(ngModel)]="reviewForm.note" class="form-input">
+              <option [ngValue]="5">5 - Excellent</option>
+              <option [ngValue]="4">4 - Très bien</option>
+              <option [ngValue]="3">3 - Bien</option>
+              <option [ngValue]="2">2 - Moyen</option>
+              <option [ngValue]="1">1 - Mauvais</option>
+            </select>
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label">Commentaire</label>
+            <textarea
+              [(ngModel)]="reviewForm.commentaire"
+              class="form-input"
+              rows="3"
+              placeholder="Partagez votre expérience sur ce produit..."
+            ></textarea>
+          </div>
+
+          <div class="review-feedback" *ngIf="reviewMessage">{{ reviewMessage }}</div>
+          <div class="review-error" *ngIf="reviewError">{{ reviewError }}</div>
+
+          <button (click)="submitReview()" class="btn btn-primary" [disabled]="reviewSubmitting">
+            {{ reviewSubmitting ? '⏳ Envoi...' : 'Publier mon avis' }}
+          </button>
+        </div>
+
+        <div class="reviews-list" *ngIf="reviews.length > 0; else noReviews">
+          <div class="review-item" *ngFor="let review of reviews">
+            <div class="review-top">
+              <div>
+                <p class="review-author">{{ review.utilisateurNom }}</p>
+                <p class="review-stars">{{ starsFor(review.note) }}</p>
+              </div>
+              <button
+                *ngIf="isAdmin || review.utilisateurId === currentUserId"
+                (click)="removeReview(review)"
+                class="btn btn-ghost review-delete"
+              >
+                Supprimer
+              </button>
+            </div>
+            <p class="review-comment">{{ review.commentaire }}</p>
+            <p class="review-date" *ngIf="review.dateCreation">{{ review.dateCreation | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+
+        <ng-template #noReviews>
+          <p class="text-muted">Aucun avis pour ce produit pour le moment.</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !produit" class="text-center py-12">
+    <p class="text-muted text-xl">Produit non trouve</p>
+  </div>
+</div>
+

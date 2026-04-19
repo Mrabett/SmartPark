@@ -1,0 +1,272 @@
+<div class="ai-suggest-page">
+
+  <!-- ===== HERO ===== -->
+  <div class="ai-hero">
+    <div class="ai-hero-bg">
+      <div class="ai-orb ai-orb-1"></div>
+      <div class="ai-orb ai-orb-2"></div>
+      <div class="ai-orb ai-orb-3"></div>
+    </div>
+    <div class="ai-hero-content">
+      <div class="ai-badge">
+        <span class="ai-badge-dot"></span>
+        Propulsé par AI
+      </div>
+      <h1 class="ai-title">
+        Découvrez de nouveaux<br/>
+        <span class="ai-title-gradient">produits à vendre</span>
+      </h1>
+      <p class="ai-subtitle">
+        Décrivez le type de produit que vous cherchez à vendre. 
+        <strong>AI</strong> analyse votre description et génère 
+        <strong>2 produits uniques</strong> prêts à être ajoutés en un clic.
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== INPUT ZONE ===== -->
+  <div class="ai-input-section">
+    <div class="ai-input-card">
+      <div class="ai-input-header">
+        <div class="ai-input-icon">🧠</div>
+        <div>
+          <h2 class="ai-input-title">Décrivez ce que vous souhaitez vendre</h2>
+          <p class="ai-input-subtitle">
+            AI va générer 2 nouveaux produits originaux basés sur votre description
+          </p>
+        </div>
+      </div>
+
+      <div class="ai-textarea-wrap">
+        <textarea
+          class="ai-textarea"
+          [class.ai-textarea-focused]="textareaFocused"
+          [(ngModel)]="description"
+          (focus)="textareaFocused = true"
+          (blur)="textareaFocused = false"
+          (keydown.enter)="onEnterKey($event)"
+          placeholder="Ex: je veux vendre une boisson énergétique pour les sportifs qui font du fitness..."
+          rows="5"
+          maxlength="500"
+        ></textarea>
+        <div class="ai-char-count" [class.ai-char-near]="description.length > 400">
+          {{ description.length }} / 500
+        </div>
+      </div>
+
+      <!-- EXAMPLES -->
+      <div class="ai-examples" *ngIf="!loading && suggestions.length === 0">
+        <p class="ai-examples-label">💡 Exemples de descriptions :</p>
+        <div class="ai-examples-list">
+          <button
+            *ngFor="let ex of examples"
+            class="ai-example-chip"
+            (click)="useExample(ex)"
+          >
+            {{ ex }}
+          </button>
+        </div>
+      </div>
+
+      <div class="ai-actions">
+        <button
+          class="ai-clear-btn"
+          *ngIf="description.length > 0"
+          (click)="clearAll()"
+        >
+          ✕ Effacer
+        </button>
+        <button
+          class="ai-submit-btn"
+          [disabled]="loading || description.trim().length < 10"
+          (click)="analyze()"
+        >
+          <span *ngIf="!loading" class="ai-submit-content">
+            <span class="ai-submit-icon">✨</span>
+            Générer avec l'IA
+          </span>
+          <span *ngIf="loading" class="ai-submit-content">
+            <span class="ai-spinner"></span>
+            Génération en cours...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOADING ANIMATION ===== -->
+  <div class="ai-loading-section" *ngIf="loading">
+    <div class="ai-loading-card">
+      <div class="ai-loading-brain">🧠</div>
+      <div class="ai-loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="ai-loading-text">AI génère vos produits...</p>
+      <div class="ai-loading-steps">
+        <div class="ai-step" [class.active]="loadingStep >= 1">
+          <span class="ai-step-check">✓</span> Envoi de votre description à AI
+        </div>
+        <div class="ai-step" [class.active]="loadingStep >= 2">
+          <span class="ai-step-check">✓</span> Analyse contextuelle par AI
+        </div>
+        <div class="ai-step" [class.active]="loadingStep >= 3">
+          <span class="ai-step-check">✓</span> Création de produits originaux
+        </div>
+        <div class="ai-step" [class.active]="loadingStep >= 4">
+          <span class="ai-step-check">✓</span> Finalisation des résultats
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SUCCESS MESSAGE ===== -->
+  <div class="ai-success-card" *ngIf="successMsg && !loading">
+    <span class="ai-success-icon">✅</span>
+    <p class="ai-success-text">{{ successMsg }}</p>
+    <button class="ai-error-close" (click)="successMsg = ''">✕</button>
+  </div>
+
+  <!-- ===== ERROR ===== -->
+  <div class="ai-error-card" *ngIf="errorMsg && !loading">
+    <span class="ai-error-icon">⚠️</span>
+    <div>
+      <p class="ai-error-title">Erreur</p>
+      <p class="ai-error-desc">{{ errorMsg }}</p>
+    </div>
+    <button class="ai-error-close" (click)="errorMsg = ''">✕</button>
+  </div>
+
+  <!-- ===== NO RESULTS ===== -->
+  <div class="ai-no-result" *ngIf="!loading && analyzed && suggestions.length === 0">
+    <div class="ai-no-result-icon">🔎</div>
+    <h3 class="ai-no-result-title">Aucun produit généré</h3>
+    <p class="ai-no-result-desc">
+      L'IA n'a pas pu générer de produit pour cette description.<br/>
+      Essayez d'être plus précis ou utilisez des termes différents.
+    </p>
+    <button class="ai-retry-btn" (click)="clearAll()">
+      🔄 Nouvelle recherche
+    </button>
+  </div>
+
+  <!-- ===== RESULTS ===== -->
+  <div class="ai-results-section" *ngIf="!loading && suggestions.length > 0">
+    <div class="ai-results-header">
+      <div class="ai-results-title-group">
+        <span class="ai-results-icon">💡</span>
+        <div>
+          <h2 class="ai-results-title">
+            {{ suggestions.length }} nouveau{{ suggestions.length > 1 ? 'x' : '' }} produit{{ suggestions.length > 1 ? 's' : '' }} généré{{ suggestions.length > 1 ? 's' : '' }}
+          </h2>
+          <p class="ai-results-subtitle">
+            Basé sur : <em>"{{ lastDescription }}"</em>
+          </p>
+        </div>
+      </div>
+      <button class="ai-new-search-btn" (click)="clearAll()">
+        🔄 Nouvelle génération
+      </button>
+    </div>
+
+    <div class="ai-cards-grid">
+      <div
+        *ngFor="let result of suggestions; let i = index"
+        class="ai-product-card"
+        [class.ai-card-added]="addedIndexes.has(i)"
+        [style.animation-delay]="(i * 0.15) + 's'"
+      >
+        <!-- Generated badge -->
+        <div class="ai-rank-badge ai-rank-generated">
+          <span class="ai-generated-sparkle">✨</span>
+          {{ result.source || 'Généré par IA' }}
+        </div>
+
+        <!-- Product image -->
+        <div class="ai-card-image-wrap">
+          <img
+            [src]="result.produit.image"
+            [alt]="result.produit.nom"
+            class="ai-card-image"
+            onerror="this.src='https://via.placeholder.com/400x220?text=Nouveau+Produit'"
+          />
+          <div class="ai-card-image-overlay"></div>
+          <span class="ai-card-category-badge">{{ result.produit.categorie }}</span>
+        </div>
+
+        <!-- Score bar -->
+        <div class="ai-score-section">
+          <div class="ai-score-label-row">
+            <span class="ai-score-label">Pertinence IA</span>
+            <span class="ai-score-value" [style.color]="getScoreColor(result.pertinence)">
+              {{ result.pertinence }}%
+            </span>
+          </div>
+          <div class="ai-score-bar-bg">
+            <div
+              class="ai-score-bar-fill"
+              [style.width.%]="result.pertinence"
+              [style.background]="getScoreColor(result.pertinence)"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Product info -->
+        <div class="ai-card-body">
+          <h3 class="ai-card-name">{{ result.produit.nom }}</h3>
+          <p class="ai-card-desc">{{ result.produit.description }}</p>
+
+          <!-- Attributes detected (New) -->
+          <div class="ai-attributes" *ngIf="result.attributes && getAttributeEntries(result.attributes).length > 0">
+            <div
+              *ngFor="let attr of getAttributeEntries(result.attributes)"
+              class="ai-attr-tag"
+            >
+              <span class="ai-attr-key">{{ attr.key }} :</span>
+              <span class="ai-attr-val">{{ attr.value }}</span>
+            </div>
+          </div>
+
+          <!-- Keywords matched -->
+          <div class="ai-keywords" *ngIf="getKeywordsArray(result.motsClesCorrespondants).length > 0">
+            <span class="ai-kw-label">🔑 Détection Précise :</span>
+            <div class="ai-kw-chips">
+              <span
+                *ngFor="let kw of getKeywordsArray(result.motsClesCorrespondants)"
+                class="ai-kw-chip"
+              >
+                {{ kw }}
+              </span>
+            </div>
+          </div>
+
+          <!-- AI reason -->
+          <div class="ai-reason-box">
+            <span class="ai-reason-icon">🤖</span>
+            <p class="ai-reason-text">{{ result.raison }}</p>
+          </div>
+
+          <!-- Price -->
+          <div class="ai-card-meta">
+            <div class="ai-card-price-group">
+              <p class="ai-card-price">{{ result.produit.prix }} DT</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card actions -->
+        <div class="ai-card-actions">
+          <button
+            class="ai-action-add"
+            [disabled]="addedIndexes.has(i) || addingIndex === i"
+            (click)="addToCatalog(result, i)"
+          >
+            <span *ngIf="addingIndex === i">⏳ Ajout en cours...</span>
+            <span *ngIf="addedIndexes.has(i) && addingIndex !== i">✅ Formulaire ouvert !</span>
+            <span *ngIf="!addedIndexes.has(i) && addingIndex !== i">🚀 Ouvrir le formulaire produit</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

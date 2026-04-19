@@ -3,6 +3,7 @@ package com.smartpark.backend.service;
 import com.smartpark.backend.model.Match;
 import com.smartpark.backend.repository.MatchRepository;
 import com.smartpark.backend.repository.UserRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class MatchSchedulerService {
     // ════════════════════════════════════════════
     @Scheduled(fixedDelay = 300000) // 5 minutes
     public void distribuerPointsMatchsTermines() {
+                try {
 
         System.out.println(
                 "🔄 Scheduler — vérification matchs "
@@ -72,6 +74,9 @@ public class MatchSchedulerService {
                                 + e.getMessage());
             }
         }
+                } catch (DataAccessException ex) {
+                        System.err.println("⚠️ Scheduler matchs: Mongo indisponible, cycle ignoré.");
+                }
     }
 
     // ════════════════════════════════════════════

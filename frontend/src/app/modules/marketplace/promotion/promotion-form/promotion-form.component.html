@@ -1,0 +1,104 @@
+<div class="page-content">
+  <div class="section-header">
+    <div>
+      <h1 class="section-title text-4xl">
+        {{ editMode ? '✏️ Modifier Promotion' : '➕ Nouvelle Promotion' }}
+      </h1>
+      <p class="view-subtitle">Creez des offres attractives pour vos clients</p>
+    </div>
+    <button routerLink="/marketplace/admin/promotions" class="btn btn-ghost">⏎ Liste des promos</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="admin-form-grid">
+    <div class="main-col space-y-6">
+      <div class="sp-card">
+        <h2 class="section-title text-xl mb-6 pb-2 border-b border-white/5">Details de l'Offre</h2>
+        
+        <div class="form-group mb-4">
+          <label class="form-label">Titre de la Promotion</label>
+          <input type="text" class="form-input" formControlName="titre" placeholder="ex: Soldes d'ete 2024" />
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label">Description</label>
+          <textarea class="form-input min-h-[100px]" formControlName="description" placeholder="Affichez un message accrocheur..."></textarea>
+        </div>
+
+        <div class="field-grid">
+          <div class="form-group">
+            <label class="form-label">Pourcentage de réduction (%)</label>
+            <div class="flex items-center gap-2">
+              <input type="number" class="form-input" formControlName="pourcentageReduction" min="1" max="100" />
+              <span class="text-2xl font-bold text-green-500">-{{ form.get('pourcentageReduction')?.value || 0 }}%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de début</label>
+            <input type="date" class="form-input" formControlName="dateDebut" />
+            <p class="text-xs text-muted mt-1">La promotion commence à partir de cette date</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de fin</label>
+            <input type="date" class="form-input" [ngClass]="{ 'border-red-500': form.get('dateFin')?.hasError('dateInvalide') && submitted }" formControlName="dateFin" />
+            <p *ngIf="form.get('dateFin')?.hasError('dateInvalide') && submitted" class="text-xs text-red-500 mt-1">⚠️ La date de fin doit être après la date de début</p>
+            <p class="text-xs text-muted mt-1">La promotion se termine à la fin de cette date</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-card">
+        <h2 class="section-title text-xl mb-4">Selectionner les produits concernes</h2>
+        <p class="helper-text">Utilisez le bouton "Selectionner" sous chaque produit pour l'ajouter clairement a cette promotion.</p>
+        
+        <div class="products-grid max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          <div 
+            *ngFor="let p of produits" 
+            class="p-4 border-2 rounded-2xl transition-all flex flex-col items-center text-center gap-3"
+            [ngClass]="isProduitSelected(p.id) ? 'border-amber-500 bg-amber-500/10' : 'border-white/5 bg-bg3 hover:border-white/20'"
+          >
+            <div class="w-12 h-12 rounded-xl overflow-hidden bg-bg/50">
+              <img [src]="p.image" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/50?text=P'"/>
+            </div>
+            <span class="text-xs font-medium text-white truncate w-full">{{ p.nom }}</span>
+            <span class="badge badge-green text-[10px]">{{ p.prix }} DT</span>
+            <button 
+              type="button"
+              (click)="toggleProduit(p.id)"
+              class="w-full mt-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all"
+              [ngClass]="isProduitSelected(p.id) 
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-white/10 text-muted hover:bg-white/20 hover:text-white'"
+            >
+              {{ isProduitSelected(p.id) ? '✓ Sélectionné' : '+ Sélectionner' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col space-y-6">
+      <div class="sp-card">
+        <h2 class="section-title text-xl mb-6">Statut</h2>
+        
+        <div class="flex items-center justify-between p-4 bg-bg3 rounded-2xl mb-8">
+          <span class="text-sm font-medium">Activer maintenant</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" formControlName="active" class="sr-only peer">
+            <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+
+        <div *ngIf="errorMessage" class="p-3 bg-red-500/10 border border-red-500/50 text-red-500 rounded-xl text-xs mb-6">
+          {{ errorMessage }}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <button type="submit" class="btn btn-primary w-full py-4 text-lg" [disabled]="loading">
+            {{ loading ? '⏳...' : (editMode ? '💾 Mettre a jour' : '✨ Publier la promo') }}
+          </button>
+          <button type="button" class="btn btn-ghost w-full" routerLink="/marketplace/admin/promotions">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

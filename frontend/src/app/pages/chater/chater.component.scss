@@ -1,0 +1,167 @@
+.chater-page {
+  padding: 1rem;
+}
+
+.chater-shell {
+  display: block;
+  min-height: 70vh;
+}
+
+.chat-pane {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.8rem;
+}
+
+.chat-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.55rem;
+}
+
+.chat-title {
+  margin: 0;
+  color: var(--text);
+}
+
+.chat-subtitle {
+  margin: 0.3rem 0 0;
+  color: #9fb0c7;
+  font-size: 0.9rem;
+}
+
+.chat-error {
+  color: #f87171;
+  font-size: 0.9rem;
+}
+
+.messages-wrap {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.8rem;
+  overflow: auto;
+  max-height: 52vh;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.message-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.message-row.mine {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: 78%;
+  background: #1f2937;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 0.65rem 0.8rem;
+}
+
+.message-row.mine .bubble {
+  background: rgba(0, 201, 127, 0.16);
+  border-color: rgba(0, 201, 127, 0.35);
+}
+
+.sender {
+  margin: 0 0 0.25rem;
+  font-size: 0.74rem;
+  color: #a8b8cf;
+}
+
+.content {
+  margin: 0;
+  color: #f8fafc;
+  white-space: pre-wrap;
+}
+
+.meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: #93a5bc;
+}
+
+.delete-btn {
+  margin-top: 0.45rem;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.14);
+  color: #fca5a5;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.edit-btn {
+  margin-top: 0.45rem;
+  margin-right: 0.35rem;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.edit-wrap {
+  margin-top: 0.35rem;
+}
+
+.edit-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.45rem;
+  resize: vertical;
+}
+
+.edit-actions {
+  margin-top: 0.35rem;
+}
+
+.edit-btn.save {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.16);
+  color: #bbf7d0;
+}
+
+.edit-btn.cancel {
+  border-color: rgba(148, 163, 184, 0.55);
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+.composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.composer-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.6rem;
+  resize: vertical;
+}
+
+.empty-text {
+  color: #9fb0c7;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 980px) {
+  .messages-wrap {
+    max-height: 45vh;
+  }
+}
