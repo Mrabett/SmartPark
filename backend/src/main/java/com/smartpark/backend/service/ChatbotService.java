@@ -22,7 +22,7 @@ public class ChatbotService {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Value("${anthropic.api.key}")
+        @Value("${anthropic.api.key:}")
     private String anthropicApiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();

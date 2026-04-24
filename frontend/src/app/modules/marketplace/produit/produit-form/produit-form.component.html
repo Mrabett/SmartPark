@@ -1,0 +1,175 @@
+<div class="page-content">
+  <div class="section-header">
+    <div>
+      <h1 class="section-title text-4xl">
+        {{ editMode ? '✏️ Modifier Produit' : '➕ Ajouter un Produit' }}
+      </h1>
+      <p class="view-subtitle">Gerez les details de votre article dans le catalogue</p>
+    </div>
+    <button routerLink="/marketplace/admin/produits" class="btn btn-ghost">⏎ Retour au catalogue</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="admin-form-grid">
+    <!-- Main Form Area -->
+    <div class="main-col space-y-6">
+      <div class="sp-card">
+        <h2 class="section-title text-xl mb-6 pb-2 border-b border-white/5">Informations Générales</h2>
+        
+        <div class="form-group mb-4">
+          <label class="form-label">Nom du Produit</label>
+          <input 
+            type="text" 
+            class="form-input"
+            formControlName="nom"
+            placeholder="ex: Ballon de match Pro"
+          />
+          <p class="text-red-400 text-xs mt-1" *ngIf="submitted && form.get('nom')?.invalid">
+            Le nom est obligatoire (min 3 caractères)
+          </p>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label">Description</label>
+          <textarea 
+            class="form-input min-h-[120px]"
+            formControlName="description"
+            placeholder="Décrivez les caractéristiques du produit..."
+          ></textarea>
+          <p class="text-red-400 text-xs mt-1" *ngIf="submitted && form.get('description')?.invalid">
+            La description est obligatoire
+          </p>
+        </div>
+
+        <div class="field-grid-3">
+          <div class="form-group">
+            <label class="form-label">Catégorie</label>
+            <input 
+              type="text" 
+              class="form-input"
+              formControlName="categorie"
+              placeholder="ex: Équipements"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prix (DT)</label>
+            <div class="relative">
+              <input 
+                type="number" 
+                class="form-input pr-12"
+                formControlName="prix"
+                placeholder="0.00"
+                step="0.01"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold">DT</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date d'expiration</label>
+            <input 
+              type="date"
+              class="form-input"
+              formControlName="dateExpiration"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-card" formGroupName="stock">
+        <h2 class="section-title text-xl mb-6 pb-2 border-b border-white/5">Gestion du Stock</h2>
+        <div class="field-grid-3">
+          <div class="form-group">
+            <label class="form-label">Quantité Actuelle</label>
+            <input type="number" class="form-input" formControlName="quantiteDisponible" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Seuil Alert Min</label>
+            <input type="number" class="form-input" formControlName="quantiteMin" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Capacité Max</label>
+            <input type="number" class="form-input" formControlName="quantiteMax" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-col space-y-6">
+      <!-- Preview Card -->
+      <div class="sp-card">
+        <h2 class="section-title text-xl mb-6">Aperçu Visuel</h2>
+
+        <div class="frame-controls mb-4">
+          <div class="form-group">
+            <label class="form-label">Hauteur du cadre</label>
+            <input
+              type="range"
+              min="160"
+              max="360"
+              step="10"
+              class="form-range"
+              [(ngModel)]="previewHeight"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <p class="text-muted text-xs mt-1">{{ previewHeight }} px</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mode d'affichage</label>
+            <select
+              class="form-select"
+              [(ngModel)]="previewFit"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option value="cover">Remplir le cadre</option>
+              <option value="contain">Afficher toute l'image</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="relative bg-bg3 rounded-2xl flex items-center justify-center overflow-hidden border border-white/5 mb-6 preview-frame" [style.height.px]="previewHeight">
+          <img 
+            [src]="form.get('image')?.value || 'https://via.placeholder.com/400x225?text=Aperçu+Image'"
+            alt="Preview"
+            class="w-full h-full"
+            [style.object-fit]="previewFit"
+          />
+        </div>
+        
+        <div class="form-group mb-8">
+          <label class="form-label">URL de l'image</label>
+          <input 
+            type="text" 
+            class="form-input text-xs"
+            formControlName="image"
+            placeholder="https://images.unsplash.com/..."
+          />
+        </div>
+
+        <div class="flex items-center justify-between p-4 bg-bg3 rounded-2xl mb-8">
+          <span class="text-sm font-medium">Statut de visibilité</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" formControlName="actif" class="sr-only peer">
+            <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+          </label>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <button 
+            type="submit"
+            class="btn btn-primary w-full py-4 text-lg"
+            [disabled]="loading"
+          >
+            {{ loading ? '⏳ Enregistrement...' : (editMode ? '💾 Mettre à jour' : '✨ Créer le produit') }}
+          </button>
+          <button 
+            type="button"
+            class="btn btn-ghost w-full"
+            routerLink="/marketplace/admin/produits"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

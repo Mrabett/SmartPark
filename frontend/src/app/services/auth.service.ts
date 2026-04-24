@@ -5,11 +5,19 @@ import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 export interface AuthUser {
+  id?:        string;
   email:      string;
   nom:        string;
+  prenom?:    string;
   role:       'ADMIN' | 'USER';
   telephone?: string;
   token:      string;
+}
+
+export interface ClientInfo {
+  id: string;
+  nom: string;
+  prenom: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -73,8 +81,39 @@ export class AuthService {
   getUser(): AuthUser | null { return this.userSubject.value; }
   getToken(): string | null  { return this.getUser()?.token || null; }
   isLoggedIn(): boolean      { return this.getUser() !== null; }
-  isAdmin(): boolean         { return this.getUser()?.role === 'ADMIN'; }
-  isUser(): boolean          { return this.getUser()?.role === 'USER'; }
+  isAdmin(): boolean {
+    const role = (this.getUser()?.role || '').toUpperCase();
+    return role === 'ADMIN';
+  }
+  isUser(): boolean {
+    const role = (this.getUser()?.role || '').toUpperCase();
+    return role === 'USER';
+  }
+
+  // ✅ Méthodes de compatibilité pour les composants Marketplace
+  isClient(): boolean {
+    return this.isUser();
+  }
+
+  getRole(): string | null {
+    const role = (this.getUser()?.role || '').toUpperCase();
+    if (!role) return null;
+    return role === 'ADMIN' ? 'admin' : 'client';
+  }
+
+  getCurrentUserId(): string {
+    const user = this.getUser();
+    return user?.id || user?.email || '1';
+  }
+
+  getClientInfo(): ClientInfo {
+    const user = this.getUser();
+    return {
+      id: this.getCurrentUserId(),
+      nom: user?.nom || 'Client',
+      prenom: user?.prenom || ''
+    };
+  }
 
   private saveUser(user: AuthUser) {
     localStorage.setItem('smartpark_user', JSON.stringify(user));

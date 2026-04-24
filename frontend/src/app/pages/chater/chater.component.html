@@ -1,0 +1,69 @@
+<div class="chater-page">
+  <div class="chater-shell sp-card">
+    <section class="chat-pane">
+      <div class="chat-header">
+        <h3 class="chat-title">💬 Chater public Marketplace</h3>
+        <p class="chat-subtitle">Tous les clients et admins voient les messages.</p>
+      </div>
+
+      <div class="chat-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="messages-wrap">
+        <div *ngIf="loading" class="empty-text">Chargement des messages...</div>
+        <div *ngIf="!loading && messages.length === 0" class="empty-text">Aucun message pour le moment. Soyez le premier à écrire.</div>
+
+        <div class="message-row" *ngFor="let msg of messages" [class.mine]="isMine(msg)">
+          <div class="bubble">
+            <p class="sender">{{ msg.senderName || 'Utilisateur' }}</p>
+            <p class="content" *ngIf="editingMessageId !== msg.id">{{ msg.content }}</p>
+
+            <div class="edit-wrap" *ngIf="editingMessageId === msg.id">
+              <textarea
+                class="edit-input"
+                [(ngModel)]="editDraft"
+                rows="2"
+              ></textarea>
+              <div class="edit-actions">
+                <button class="edit-btn save" [disabled]="updating" (click)="saveEdit(msg)">
+                  {{ updating ? 'Enregistrement...' : 'Enregistrer' }}
+                </button>
+                <button class="edit-btn cancel" [disabled]="updating" (click)="cancelEdit()">Annuler</button>
+              </div>
+            </div>
+
+            <p class="meta">{{ msg.createdAt | date:'dd/MM HH:mm' }}</p>
+            <p class="meta" *ngIf="msg.updatedAt">modifié</p>
+            <button
+              *ngIf="canEdit(msg) && editingMessageId !== msg.id"
+              class="edit-btn"
+              (click)="startEdit(msg)"
+              title="Modifier"
+            >
+              Modifier
+            </button>
+            <button
+              *ngIf="isAdmin"
+              class="delete-btn"
+              (click)="removeMessage(msg.id)"
+              title="Supprimer"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <textarea
+          class="composer-input"
+          [(ngModel)]="draft"
+          placeholder="Envoyer un message à toute la communauté..."
+          rows="2"
+        ></textarea>
+        <button class="btn btn-primary" [disabled]="sending" (click)="send()">
+          {{ sending ? 'Envoi...' : 'Envoyer' }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

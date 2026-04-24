@@ -1,0 +1,89 @@
+<div class="page-content">
+  <div class="section-header">
+    <div>
+      <h1 class="section-title text-4xl">🎯 Gestion des Objectifs</h1>
+      <p class="view-subtitle">Créez des parcours clients orientés par objectif et associez-y les produits.</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="sp-card text-center py-12">
+    <p class="text-muted">Chargement...</p>
+  </div>
+
+  <div class="admin-grid" *ngIf="!loading">
+    <div class="sp-card">
+      <h2 class="section-title text-xl mb-4">{{ editId ? 'Modifier objectif' : 'Nouvel objectif' }}</h2>
+
+      <div *ngIf="successMessage" class="msg success">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="msg error">{{ errorMessage }}</div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Titre</label>
+        <input [(ngModel)]="form.titre" class="form-input" placeholder="Ex: Je prepare un match" />
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Description</label>
+        <textarea [(ngModel)]="form.description" class="form-input" rows="3" placeholder="Décrivez ce parcours..."></textarea>
+      </div>
+
+      <div class="field-row mb-3">
+        <div class="form-group">
+          <label class="form-label">Icône</label>
+          <input [(ngModel)]="form.icon" class="form-input" placeholder="🎯" />
+        </div>
+        <div class="form-group toggle-wrap">
+          <label class="form-label">Actif</label>
+          <input type="checkbox" [(ngModel)]="form.actif" />
+        </div>
+      </div>
+
+      <h3 class="section-title text-lg mb-2">Produits associés</h3>
+      <div class="produits-list">
+        <button
+          type="button"
+          class="produit-item"
+          *ngFor="let p of produits"
+          [class.active]="isSelected(p.id)"
+          (click)="toggleProduit(p.id)"
+        >
+          <span>{{ p.nom }}</span>
+          <span class="badge" [ngClass]="isSelected(p.id) ? 'badge-green' : 'badge-amber'">
+            {{ isSelected(p.id) ? 'Ajouté' : 'Ajouter' }}
+          </span>
+        </button>
+      </div>
+
+      <div class="actions mt-4">
+        <button class="btn btn-primary" [disabled]="submitting" (click)="submit()">
+          {{ submitting ? '⏳...' : (editId ? '💾 Mettre à jour' : '✨ Ajouter objectif') }}
+        </button>
+        <button class="btn btn-ghost" type="button" (click)="resetForm()">Annuler</button>
+      </div>
+    </div>
+
+    <div class="sp-card">
+      <h2 class="section-title text-xl mb-4">Objectifs existants</h2>
+
+      <div class="objectif-list" *ngIf="objectifs.length > 0; else noData">
+        <div class="objectif-item" *ngFor="let objectif of objectifs">
+          <div class="objectif-top">
+            <div>
+              <p class="objectif-title">{{ objectif.icon || '🎯' }} {{ objectif.titre }}</p>
+              <p class="objectif-desc">{{ objectif.description }}</p>
+              <p class="objectif-meta">Produits: {{ objectif.produitIds.length || 0 }} | {{ objectif.actif ? 'Actif' : 'Inactif' }}</p>
+            </div>
+          </div>
+          <div class="objectif-actions">
+            <button class="btn btn-ghost" (click)="editObjectif(objectif)">Modifier</button>
+            <button class="btn btn-ghost danger" (click)="deleteObjectif(objectif)">Supprimer</button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noData>
+        <p class="text-muted">Aucun objectif configuré.</p>
+      </ng-template>
+    </div>
+  </div>
+</div>

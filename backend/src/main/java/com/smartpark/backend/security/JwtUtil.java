@@ -10,10 +10,11 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
+    // Fallback pour éviter le crash si application.properties n'est pas chargé.
+    @Value("${jwt.secret:413F4428472B4B6250655368566D5970337336763979244226452948404D6351}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400000}")
     private long expiration;
 
     private Key getKey() {

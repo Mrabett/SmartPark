@@ -1,0 +1,59 @@
+<div class="page-content objectifs-page">
+  <div class="hero sp-card">
+    <h1 class="section-title text-4xl">Parcours Par Objectif</h1>
+    <p class="hero-subtitle">Choisissez votre objectif et decouvrez une selection pensee pour votre besoin du moment.</p>
+  </div>
+
+  <div class="objectifs-grid">
+    <button
+      *ngFor="let objectif of objectifs; let i = index"
+      class="objectif-card"
+      [class.active]="selectedObjectiveId === objectif.id"
+      [ngClass]="i % 3 === 0 ? 'theme-match' : (i % 3 === 1 ? 'theme-recovery' : 'theme-start')"
+      (click)="selectObjective(objectif.id)"
+    >
+      <p class="objectif-icon">{{ objectif.icon || '🎯' }}</p>
+      <p class="objectif-title">{{ objectif.titre }}</p>
+      <p class="objectif-subtitle">{{ objectif.description }}</p>
+    </button>
+  </div>
+
+  <div class="selection-header sp-card" *ngIf="selectedConfig">
+    <p class="selection-label">Objectif selectionne</p>
+    <h2 class="section-title text-2xl">{{ selectedConfig.icon || '🎯' }} {{ selectedConfig.titre }}</h2>
+    <p class="selection-subtitle">{{ selectedConfig.description }}</p>
+  </div>
+
+  <div *ngIf="loading" class="sp-card text-center py-12">
+    <p class="text-muted">Chargement des suggestions...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="sp-card text-center py-8">
+    <p class="error-text">{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && filteredProducts.length === 0" class="sp-card text-center py-12">
+    <p class="text-muted">Aucun produit correspondant pour cet objectif.</p>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && objectifs.length === 0" class="sp-card text-center py-12">
+    <p class="text-muted">Aucun objectif actif pour le moment.</p>
+  </div>
+
+  <div *ngIf="!loading && filteredProducts.length > 0" class="products-grid">
+    <div class="product-card sp-card" *ngFor="let produit of filteredProducts; trackBy: trackByProduitId">
+      <div class="product-media">
+        <img [src]="produit.image" [alt]="produit.nom" onerror="this.src='https://via.placeholder.com/400x260?text=Produit'" />
+        <span class="badge badge-green category-badge">{{ produit.categorie }}</span>
+      </div>
+
+      <h3 class="section-title text-xl product-title">{{ produit.nom }}</h3>
+      <p class="product-desc">{{ produit.description }}</p>
+
+      <div class="product-footer">
+        <p class="price">{{ produit.prix }} DT</p>
+        <button class="btn btn-primary" (click)="addToCart(produit)">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
